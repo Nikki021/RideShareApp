@@ -52,3 +52,6 @@ class UserService:
         if user and verify_password(password, user.hashed_password):
             return user
         return None
+    
+    def is_logged_in(self, user_id: str) -> bool:
+        return user_id in self.users
