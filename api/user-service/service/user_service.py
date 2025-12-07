@@ -18,10 +18,14 @@ class UserService:
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
             dob=user_create.dob,
-            role=user_create.role
+            role=user_create.role,
+            is_logged_in=False
         )
         self.users[user_id] = new_user
         return new_user
+    
+    def get_user_by_id(self, user_id: str) -> User | None:
+        return self.users.get(user_id)
 
     def get_user_by_email(self, user_email: str) -> User | None:
         for user in self.users.values():
@@ -50,8 +54,16 @@ class UserService:
     def login_user(self, email: str, password: str) -> User | None:
         user = self.get_user_by_email(email)
         if user and verify_password(password, user.hashed_password):
-            return user
-        return None
+            user.is_logged_in = True
+            return {"message": "Login successful", "user_details": user}
+        return {"error": "Invalid email or password"}
     
     def is_logged_in(self, user_id: str) -> bool:
-        return user_id in self.users
+        return self.get_user_by_id(user_id).is_logged_in if self.get_user_by_id(user_id) else False
+    
+    def logout_user(self, user_id: str):
+        user = self.get_user_by_id(user_id)
+        if user and user.is_logged_in:
+            user.is_logged_in = False
+            return {"message": "Logout successful"}
+        return {"error": "User is not logged in"}

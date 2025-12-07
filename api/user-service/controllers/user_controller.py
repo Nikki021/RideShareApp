@@ -59,7 +59,7 @@ def delete_user(user_id: str):
 
 @router.post("/login")
 def login_user(email: str, password: str):
-    user = user_service.login_user(email, password)
+    user = user_service.login_user(email, password).get("user_details")
     if not user:
         return {"error": "Invalid email or password"}
     return {"message": "Login successful", 
@@ -70,3 +70,21 @@ def login_user(email: str, password: str):
                 "role": user.role
             }
             }
+
+@router.get("/verify/{user_id}")
+def verify_user(user_id: str):
+    user = user_service.get_user_by_id(user_id)
+    if not user:
+        return {"exists": False}
+    return {
+        "exists": True,
+        "is_logged_in": user.is_logged_in,
+        "role": user.role
+    }
+
+@router.post("/logout/{user_id}")
+def logout_user(user_id: str):
+    result = user_service.logout_user(user_id)
+    if "error" in result:
+        return result
+    return result
