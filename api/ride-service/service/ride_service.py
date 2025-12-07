@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 import requests
 import uuid
 from datetime import datetime, timezone
@@ -11,11 +12,17 @@ class RideService:
 
     def _validate_user(self, user_id: str):
         # Simulate a call to the user service to validate user existence
-        response = requests.get(f"{USER_SERVICE_URL}/users/{user_id}")
+        response = requests.get(f"{USER_SERVICE_URL}/users/verify/{user_id}")
         if response.status_code != 200:
-            raise ValueError("User not found")
-
-        return response.json()
+            raise HTTPException(status_code=500, detail="User service is unavailable")
+        data = response.json()
+        if not data.get("exists"):
+            raise HTTPException(status_code=404, detail="User not found")
+        elif not data.get("is_logged_in"):
+            raise HTTPException(status_code=401, detail="User is not logged in")
+        elif data.get("role") != "rider":
+            raise HTTPException(status_code=403, detail="Please login as a rider to request a ride")
+        
 
     def create_ride_request(self, create_ride_request: RideRequestCreate) -> RideRequest:
         # Placeholder logic for creating a ride

@@ -10,6 +10,7 @@ class User(BaseModel):
     updated_at: datetime
     dob: date | None = None
     role: str
+    is_logged_in: bool = False
 
 class UserCreate(BaseModel):
     username: str
