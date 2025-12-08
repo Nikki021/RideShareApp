@@ -2,7 +2,7 @@ from fastapi import HTTPException
 import requests
 import uuid
 from datetime import datetime, timezone
-from ..models.ride_model import RideRequest, RideRequestCreate, RideStatus
+from ..models.ride_model import Ride, RideRequest, RideRequestCreate, RideRequestStatus, RideStatus
 
 USER_SERVICE_URL = "http://localhost:8000"  # Example URL for the user service
 
@@ -33,7 +33,42 @@ class RideService:
             pickup_location=create_ride_request.pickup_location,
             dropoff_location=create_ride_request.dropoff_location,
             requested_at=datetime.now(timezone.utc),
-            status=RideStatus.REQUESTED
+            status=RideRequestStatus.REQUESTED
         )
         self.ride_requests[ride_request.id] = ride_request
         return ride_request
+    
+    def _validate_accept_request(self, driver_id: str, ride_request_id: str):
+        ride_request = self.ride_requests.get(ride_request_id)
+        if not ride_request:
+            raise HTTPException(status_code=404, detail="Ride request not found")
+        if ride_request.status != RideRequestStatus.REQUESTED:
+            raise HTTPException(status_code=400, detail="Ride request is not in a valid state to be accepted")
+        
+        response = requests.get(f"{USER_SERVICE_URL}/users/verify/{driver_id}")
+        if response.status_code != 200:
+            raise HTTPException(status_code=500, detail="User service is unavailable")
+        data = response.json()
+        if not data.get("exists"):
+            raise HTTPException(status_code=404, detail="Driver not found")
+        elif not data.get("is_logged_in"):
+            raise HTTPException(status_code=401, detail="Driver is not logged in")
+        elif data.get("role") != "driver":
+            raise HTTPException(status_code=403, detail="Please login as a driver to accept a ride")
+    
+    def accept_ride_request(self, ride_request_id: str, driver_id: str) -> Ride:
+        # Placeholder logic for accepting a ride request
+        self._validate_accept_request(driver_id, ride_request_id)
+        ride_request = self.ride_requests[ride_request_id]
+        
+        ride_request.status = RideRequestStatus.ACCEPTED
+        ride = Ride(
+            id=str(uuid.uuid4()),
+            ride_request_id=ride_request.id,
+            driver_id=driver_id,
+            start_time=None,
+            end_time=None,
+            fare=None,
+            status=RideStatus.DRIVER_ASSIGNED
+        )
+        return ride

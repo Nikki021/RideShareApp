@@ -2,10 +2,14 @@ from datetime import datetime
 from pydantic import BaseModel
 from enum import Enum
 
-class RideStatus(str, Enum):
+class RideRequestStatus(str, Enum):
     REQUESTED = "requested"
     ACCEPTED = "accepted"
-    DRIVER_ARRIVING = "driver_arriving"
+    CANCELED = "canceled"
+
+class RideStatus(str, Enum):
+    REQUESTED = "requested"
+    DRIVER_ASSIGNED = "driver_assigned"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     CANCELED = "canceled"
@@ -21,7 +25,7 @@ class RideRequest(BaseModel):
     pickup_location: str
     dropoff_location: str
     requested_at: datetime
-    status: RideStatus = RideStatus.REQUESTED
+    status: RideRequestStatus = RideRequestStatus.REQUESTED
 
 class DriverStatus(BaseModel):
     driver_id: str
