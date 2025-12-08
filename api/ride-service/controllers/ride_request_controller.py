@@ -13,3 +13,12 @@ def create_ride_request(ride_request: RideRequestCreate):
         "message": "Ride request created successfully",
         "ride_request_details": ride_request
     }
+
+@router.post("/accept_ride/{ride_request_id}")
+def accept_ride_request(ride_request_id: str, driver_id: str):
+    # Placeholder logic for accepting a ride request
+    ride_request = rideService.accept_ride_request(ride_request_id, driver_id)
+    return {
+        "message": "Ride request accepted successfully",
+        "ride_request_details": ride_request
+    }
