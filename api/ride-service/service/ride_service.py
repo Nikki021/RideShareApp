@@ -9,6 +9,7 @@ USER_SERVICE_URL = "http://localhost:8000"  # Example URL for the user service
 class RideService:
     def __init__(self):
         self.ride_requests = {}
+        self.rides = {}
 
     def _validate_user(self, user_id: str):
         # Simulate a call to the user service to validate user existence
@@ -86,4 +87,32 @@ class RideService:
             fare=None,
             status=RideStatus.DRIVER_ASSIGNED
         )
+        self.rides[ride.id] = ride
         return ride
+    
+    def cancel_ride_request_by_driver(self, ride_request_id: str, driver_id: str, ride_id: str) -> RideRequest:
+        ride_request = self.ride_requests.get(ride_request_id)
+        if not ride_request:
+            raise HTTPException(status_code=404, detail="Ride request not found")
+        if ride_request.status != RideRequestStatus.ACCEPTED:
+            raise HTTPException(status_code=400, detail="Ride request cannot be cancelled in its current state")
+        
+        response = requests.get(f"{USER_SERVICE_URL}/users/verify/{driver_id}")
+        if response.status_code != 200:
+            raise HTTPException(status_code=500, detail="User service is unavailable")
+        data = response.json()
+        if not data.get("exists"):
+            raise HTTPException(status_code=404, detail="Driver not found")
+        elif not data.get("is_logged_in"):
+            raise HTTPException(status_code=401, detail="Driver is not logged in")
+        elif data.get("role") != "driver":
+            raise HTTPException(status_code=403, detail="Please login as a driver to cancel a ride")
+        
+        ride_request.status = RideRequestStatus.REQUESTED
+        ride_request.updated_at = datetime.now(timezone.utc)
+        ride = self.rides.get(ride_id)
+        if ride:
+            ride.status = RideStatus.CANCELED
+            ride.driver_id = None
+
+        return ride_request
