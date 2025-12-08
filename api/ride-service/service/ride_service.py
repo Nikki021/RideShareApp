@@ -33,9 +33,23 @@ class RideService:
             pickup_location=create_ride_request.pickup_location,
             dropoff_location=create_ride_request.dropoff_location,
             requested_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
             status=RideRequestStatus.REQUESTED
         )
         self.ride_requests[ride_request.id] = ride_request
+        return ride_request
+    
+    def cancel_ride_request(self, ride_request_id: str, user_id: str) -> RideRequest:
+        ride_request = self.ride_requests.get(ride_request_id)
+        if not ride_request:
+            raise HTTPException(status_code=404, detail="Ride request not found")
+        if ride_request.user_id != user_id:
+            raise HTTPException(status_code=403, detail="You are not authorized to cancel this ride request")
+        if ride_request.status != RideRequestStatus.REQUESTED:
+            raise HTTPException(status_code=400, detail="Ride request cannot be cancelled in its current state")
+        
+        ride_request.status = RideRequestStatus.CANCELED
+        ride_request.updated_at = datetime.now(timezone.utc)
         return ride_request
     
     def _validate_accept_request(self, driver_id: str, ride_request_id: str):
@@ -62,6 +76,7 @@ class RideService:
         ride_request = self.ride_requests[ride_request_id]
         
         ride_request.status = RideRequestStatus.ACCEPTED
+        ride_request.updated_at = datetime.now(timezone.utc)
         ride = Ride(
             id=str(uuid.uuid4()),
             ride_request_id=ride_request.id,

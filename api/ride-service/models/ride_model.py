@@ -25,6 +25,7 @@ class RideRequest(BaseModel):
     pickup_location: str
     dropoff_location: str
     requested_at: datetime
+    updated_at: datetime | None = None
     status: RideRequestStatus = RideRequestStatus.REQUESTED
 
 class DriverStatus(BaseModel):
