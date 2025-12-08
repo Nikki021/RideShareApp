@@ -14,6 +14,15 @@ def create_ride_request(ride_request: RideRequestCreate):
         "ride_request_details": ride_request
     }
 
+@router.post("/cancel_request/{ride_request_id}")
+def cancel_ride_request(ride_request_id: str, user_id: str):
+    # Placeholder logic for cancelling a ride request
+    ride_request = rideService.cancel_ride_request(ride_request_id, user_id)
+    return {
+        "message": "Ride request cancelled successfully",
+        "ride_request_details": ride_request
+    }
+
 @router.post("/accept_ride/{ride_request_id}")
 def accept_ride_request(ride_request_id: str, driver_id: str):
     # Placeholder logic for accepting a ride request
