@@ -8,6 +8,7 @@ rideService = RideService()  # Placeholder for ride service instance
 @router.post("/create")
 def create_ride_request(ride_request: RideRequestCreate):
     # Placeholder logic for creating a ride request
+    print("Creating ride request...", ride_request)
     ride_request = rideService.create_ride_request(ride_request)
     return {
         "message": "Ride request created successfully",
