@@ -28,6 +28,7 @@ class RideService:
     def create_ride_request(self, create_ride_request: RideRequestCreate) -> RideRequest:
         # Placeholder logic for creating a ride
         self._validate_user(create_ride_request.user_id)
+        print("User validated successfully.")
         ride_request = RideRequest(
             id=str(uuid.uuid4()),
             user_id=create_ride_request.user_id,

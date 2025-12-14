@@ -3,8 +3,11 @@ from openai import OpenAI
 from ..models.ai_service_models import ParsedRideRequest
 from dotenv import load_dotenv
 import os
+import requests
 
 load_dotenv()
+ride_service_url = os.getenv("RIDE_SERVICE_URL", "http://localhost:8001")
+user_service_url = os.getenv("USER_SERVICE_URL", "http://localhost:8000")
 
 class AIService:
     def __init__(self):
@@ -43,6 +46,41 @@ User text: "{request_text}"
         if not parsed_json.get("pickup_location") or not parsed_json.get("dropoff_location"):
             raise ValueError("Failed to extract necessary ride request details")
         
+        # Create a temporary user in user service to associate with the ride request
+        print("Creating temporary user in user service...")
+        user_creation_response = requests.post(user_service_url + "/users/register", json={
+            "username": "temp_ai_user",
+            "email": f"temp_ai_user_{os.urandom(4).hex()}@example.com",
+            "password": "temporary_password",
+            "role": "rider"
+        })
+        if user_creation_response.status_code != 200:
+            raise Exception("Failed to create temporary user in user service")
+        temp_user = user_creation_response.json().get("user_details")
+        print("Temporary user created:", temp_user)
+
+        # Login the temporary user to get a session (if needed)
+        print("Logging in temporary user...")
+        login_response = requests.post(user_service_url + "/users/login", params={
+            "email": temp_user.get("email"),
+            "password": "temporary_password"
+        })
+        if login_response.status_code != 200:
+            raise Exception("Failed to log in temporary user")
+        print("Temporary user logged in successfully.")
+        
+        # Call ride service to create ride request with parsed data
+        print("Calling ride service to create ride request...")
+        ride_service_response = requests.post(ride_service_url + "/ride-requests/create", json={
+            "user_id": temp_user["id"],
+            "pickup_location": parsed_json.get("pickup_location"),
+            "dropoff_location": parsed_json.get("dropoff_location")
+        })
+
+        if ride_service_response.status_code != 200:
+            raise Exception("Failed to create ride request in ride service")
+        
+        print("Ride request created successfully in ride service.")
         return ParsedRideRequest(
             pickup_location=parsed_json.get("pickup_location"),
             dropoff_location=parsed_json.get("dropoff_location")
