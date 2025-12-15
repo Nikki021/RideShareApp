@@ -1,11 +1,14 @@
 from datetime import datetime, timezone
+from sqlalchemy.orm import Session
 from ..models.user_model import User, UserCreate
 import uuid
 from ..security.hashing import hash_password, verify_password
+from ..database.user_database import *
 
 class UserService:
     def __init__(self):
         self.users = {}  # In-memory user storage for demonstration
+        self.db: Session = SessionLocal()
 
     def create_user(self, user_create: UserCreate) -> User:
         user_id = str(uuid.uuid4())
@@ -21,7 +24,9 @@ class UserService:
             role=user_create.role,
             is_logged_in=False
         )
-        self.users[user_id] = new_user
+        # self.users[user_id] = new_user
+        # store the created user in the database
+        store_user(self.db, new_user)
         return new_user
     
     def get_user_by_id(self, user_id: str) -> User | None:
