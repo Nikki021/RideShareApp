@@ -11,10 +11,15 @@ user_service_url = os.getenv("USER_SERVICE_URL", "http://localhost:8000")
 
 class AIService:
     def __init__(self):
-        self.client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        api_key = os.getenv("OPENAI_API_KEY")
+        self.client = OpenAI(api_key=api_key) if api_key else None
 
     def parse_ride_request(self, request_text: str) -> dict:
         # Get input text from user: request_text
+
+        # If no OpenAI API key is provided, use simple text parsing
+        if not self.client:
+            return self._parse_with_simple_logic(request_text)
 
         # Pass this text to an AI model (e.g., OpenAI GPT) to extract pickup and dropoff locations
         response_from_llm = self.client.chat.completions.create(
@@ -85,5 +90,37 @@ User text: "{request_text}"
             pickup_location=parsed_json.get("pickup_location"),
             dropoff_location=parsed_json.get("dropoff_location")
         )
+
+    def _parse_with_simple_logic(self, request_text: str) -> dict:
+        """Simple text parsing fallback when OpenAI API is not available"""
+        # Look for common patterns like "from X to Y" or "X to Y"
+        text_lower = request_text.lower()
+        
+        # Try to extract locations from common patterns
+        if " from " in text_lower and " to " in text_lower:
+            parts = text_lower.split(" from ")
+            if len(parts) > 1:
+                rest = parts[1].split(" to ")
+                if len(rest) >= 2:
+                    pickup = rest[0].strip()
+                    dropoff = rest[1].strip()
+                    return ParsedRideRequest(
+                        pickup_location=pickup.title(),
+                        dropoff_location=dropoff.title()
+                    )
+        
+        # Try simpler pattern "X to Y"
+        if " to " in text_lower:
+            parts = text_lower.split(" to ")
+            if len(parts) >= 2:
+                pickup = parts[0].strip()
+                dropoff = parts[1].strip()
+                return ParsedRideRequest(
+                    pickup_location=pickup.title(),
+                    dropoff_location=dropoff.title()
+                )
+        
+        # Default fallback
+        raise ValueError("Could not parse locations. Please use format: 'from [pickup] to [dropoff]' or '[pickup] to [dropoff]'")
 
         # Call ride service to create ride request with parsed data (will implement later)

@@ -33,8 +33,8 @@ echo "-------------------"
 
 # Start User Service
 echo "🟢 Starting User Service on port 8000..."
-cd "$SCRIPT_DIR/api/user-service"
-uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+cd "$SCRIPT_DIR/api"
+python run_user_service.py &
 USER_PID=$!
 echo "User Service PID: $USER_PID"
 
@@ -43,8 +43,7 @@ sleep 2
 
 # Start Ride Service
 echo "🟢 Starting Ride Service on port 8001..."
-cd "$SCRIPT_DIR/api/ride-service"
-uvicorn main:app --host 0.0.0.0 --port 8001 --reload &
+python run_ride_service.py &
 RIDE_PID=$!
 echo "Ride Service PID: $RIDE_PID"
 
@@ -53,8 +52,7 @@ sleep 2
 
 # Start AI Service
 echo "🟢 Starting AI Service on port 8002..."
-cd "$SCRIPT_DIR/api/ai-service"
-uvicorn main:app --host 0.0.0.0 --port 8002 --reload &
+python run_ai_service.py &
 AI_PID=$!
 echo "AI Service PID: $AI_PID"
 
@@ -64,7 +62,7 @@ sleep 2
 # Start Web Application
 echo "🟢 Starting Web Application on port 3000..."
 cd "$SCRIPT_DIR/website"
-uvicorn main:app --host 0.0.0.0 --port 3000 --reload &
+python main.py &
 WEB_PID=$!
 echo "Web Application PID: $WEB_PID"
 
