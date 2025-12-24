@@ -22,8 +22,22 @@ function initializeApp() {
     // Check if user is logged in from localStorage
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
-        currentUser = JSON.parse(savedUser);
-        updateUIForLoggedInUser();
+        try {
+            currentUser = JSON.parse(savedUser);
+            // Validate user object structure
+            if (currentUser && currentUser.id && currentUser.username && currentUser.role) {
+                updateUIForLoggedInUser();
+            } else {
+                // Invalid user data, clear it
+                localStorage.removeItem('currentUser');
+                currentUser = null;
+            }
+        } catch (error) {
+            // Invalid JSON, clear it
+            console.error('Failed to parse user data:', error);
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+        }
     }
 }
 
@@ -150,16 +164,18 @@ async function handleLogin(e) {
     const password = document.getElementById('login-password').value;
 
     try {
-        const url = `${API_CONFIG.USER_SERVICE}/users/login?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`;
+        const url = `${API_CONFIG.USER_SERVICE}/users/login`;
         addFlowItem('User Service', 'Login', 'pending', `Attempting login for ${email}`);
         
+        // Send credentials in request body as JSON
         const response = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
         });
         
         const data = await response.json();
-        logAPICall('POST', url, response.status, { email }, data);
+        logAPICall('POST', url, response.status, { email: email }, data);
 
         if (data.error) {
             addFlowItem('User Service', 'Login', 'error', data.error);
@@ -285,12 +301,13 @@ async function handleAIRideRequest(e) {
 
     try {
         // First call AI service to parse the request
-        const aiUrl = `${API_CONFIG.AI_SERVICE}/ai/parse_ride_request?request_text=${encodeURIComponent(requestText)}`;
+        const aiUrl = `${API_CONFIG.AI_SERVICE}/ai/parse_ride_request`;
         addFlowItem('AI Service', 'Parse Request', 'pending', `Parsing: "${requestText}"`);
         
         const aiResponse = await fetch(aiUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ request_text: requestText })
         });
         
         const aiData = await aiResponse.json();

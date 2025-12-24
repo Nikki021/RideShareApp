@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # RideShare Application Startup Script
 # This script starts all four services in separate terminals

@@ -86,10 +86,10 @@ User text: "{request_text}"
             raise Exception("Failed to create ride request in ride service")
         
         print("Ride request created successfully in ride service.")
-        return ParsedRideRequest(
-            pickup_location=parsed_json.get("pickup_location"),
-            dropoff_location=parsed_json.get("dropoff_location")
-        )
+        return {
+            "pickup_location": parsed_json.get("pickup_location"),
+            "dropoff_location": parsed_json.get("dropoff_location")
+        }
 
     def _parse_with_simple_logic(self, request_text: str) -> dict:
         """Simple text parsing fallback when OpenAI API is not available"""
@@ -104,10 +104,10 @@ User text: "{request_text}"
                 if len(rest) >= 2:
                     pickup = rest[0].strip()
                     dropoff = rest[1].strip()
-                    return ParsedRideRequest(
-                        pickup_location=pickup.title(),
-                        dropoff_location=dropoff.title()
-                    )
+                    return {
+                        "pickup_location": pickup.title(),
+                        "dropoff_location": dropoff.title()
+                    }
         
         # Try simpler pattern "X to Y"
         if " to " in text_lower:
@@ -115,10 +115,10 @@ User text: "{request_text}"
             if len(parts) >= 2:
                 pickup = parts[0].strip()
                 dropoff = parts[1].strip()
-                return ParsedRideRequest(
-                    pickup_location=pickup.title(),
-                    dropoff_location=dropoff.title()
-                )
+                return {
+                    "pickup_location": pickup.title(),
+                    "dropoff_location": dropoff.title()
+                }
         
         # Default fallback
         raise ValueError("Could not parse locations. Please use format: 'from [pickup] to [dropoff]' or '[pickup] to [dropoff]'")

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # RideShare Application Stop Script
 # This script stops all running services

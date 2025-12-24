@@ -7,8 +7,8 @@ app = FastAPI(title="Ride Service API", version="1.0.0")
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=False,  # Set to True only when using specific origins
     allow_methods=["*"],
     allow_headers=["*"],
 )
