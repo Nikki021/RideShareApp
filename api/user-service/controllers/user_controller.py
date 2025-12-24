@@ -34,6 +34,19 @@ def get_user(user_id: str):
         "role": user.role
     }
 
+@router.get("/email/{user_email}")
+def get_user_by_email(user_email: str):
+    user = user_service.get_user_by_email(user_email)
+    if not user:
+        return {"error": "User not found"}
+    return {
+        "id": user.id,
+        "username": user.username,
+        "email": user.email,
+        "created_at": user.created_at,
+        "role": user.role
+    }
+
 @router.put("/{user_id}")
 def update_user(user_id: str, user_update: UserCreate):
     user = user_service.users.get(user_id)

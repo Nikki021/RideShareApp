@@ -5,3 +5,5 @@ passlib[bcrypt]
 sqlite3
 openai
 python-dotenv
+pymysql
+sqlalchemy
