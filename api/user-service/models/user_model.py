@@ -1,5 +1,10 @@
 from datetime import datetime, date
 from pydantic import BaseModel
+from enum import Enum
+
+class Role(str, Enum):
+    DRIVER = "driver"
+    RIDER = "rider"
 
 class User(BaseModel):
     id: str
@@ -9,7 +14,7 @@ class User(BaseModel):
     created_at: datetime
     updated_at: datetime
     dob: date | None = None
-    role: str
+    role: Role
     is_logged_in: bool = False
 
 class UserCreate(BaseModel):
@@ -17,4 +22,4 @@ class UserCreate(BaseModel):
     email: str
     password: str
     dob: date | None = None
-    role: str
+    role: Role
