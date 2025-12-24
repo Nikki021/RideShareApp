@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RideShare Application</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚗 RideShare Application</h1>
+            <div id="user-info" class="user-info" style="display: none;">
+                <span id="username-display"></span>
+                <button id="logout-btn" class="btn btn-secondary">Logout</button>
+            </div>
+        </header>
+
+        <!-- Service Status Panel -->
+        <div class="service-status-panel">
+            <h2>Service Status Dashboard</h2>
+            <div class="services-grid">
+                <div class="service-card" id="user-service-status">
+                    <h3>👤 User Service</h3>
+                    <div class="status-indicator">
+                        <span class="status-dot" id="user-service-dot"></span>
+                        <span id="user-service-text">Checking...</span>
+                    </div>
+                    <div class="service-stats">
+                        <p>Port: 8000</p>
+                        <p>Endpoints: /users/*</p>
+                    </div>
+                </div>
+                <div class="service-card" id="ride-service-status">
+                    <h3>🚕 Ride Service</h3>
+                    <div class="status-indicator">
+                        <span class="status-dot" id="ride-service-dot"></span>
+                        <span id="ride-service-text">Checking...</span>
+                    </div>
+                    <div class="service-stats">
+                        <p>Port: 8001</p>
+                        <p>Endpoints: /ride-requests/*</p>
+                    </div>
+                </div>
+                <div class="service-card" id="ai-service-status">
+                    <h3>🤖 AI Service</h3>
+                    <div class="status-indicator">
+                        <span class="status-dot" id="ai-service-dot"></span>
+                        <span id="ai-service-text">Checking...</span>
+                    </div>
+                    <div class="service-stats">
+                        <p>Port: 8002</p>
+                        <p>Endpoints: /ai/*</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Call Flow Visualization -->
+        <div class="flow-panel">
+            <h2>API Call Flow Visualization</h2>
+            <div id="flow-container" class="flow-container">
+                <p class="flow-info">Interact with the application below to see API calls in real-time</p>
+            </div>
+        </div>
+
+        <!-- Authentication Section -->
+        <div class="section" id="auth-section">
+            <h2>User Authentication</h2>
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="login">Login</button>
+                <button class="tab-btn" data-tab="register">Register</button>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="login-tab" class="tab-content active">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email:</label>
+                        <input type="email" id="login-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password:</label>
+                        <input type="password" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-tab" class="tab-content">
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="register-username">Username:</label>
+                        <input type="text" id="register-username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-email">Email:</label>
+                        <input type="email" id="register-email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-password">Password:</label>
+                        <input type="password" id="register-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="register-dob">Date of Birth:</label>
+                        <input type="date" id="register-dob">
+                    </div>
+                    <div class="form-group">
+                        <label for="register-role">Role:</label>
+                        <select id="register-role" required>
+                            <option value="rider">Rider</option>
+                            <option value="driver">Driver</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Register</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Ride Request Section (for riders) -->
+        <div class="section" id="rider-section" style="display: none;">
+            <h2>Request a Ride</h2>
+            
+            <div class="subsection">
+                <h3>AI-Powered Natural Language Request</h3>
+                <form id="ai-ride-form">
+                    <div class="form-group">
+                        <label for="ai-request-text">Describe your ride:</label>
+                        <textarea id="ai-request-text" rows="3" placeholder="e.g., I need to go from Times Square to Central Park"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Parse with AI</button>
+                </form>
+            </div>
+
+            <div class="subsection">
+                <h3>Manual Ride Request</h3>
+                <form id="ride-request-form">
+                    <div class="form-group">
+                        <label for="pickup-location">Pickup Location:</label>
+                        <input type="text" id="pickup-location" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dropoff-location">Dropoff Location:</label>
+                        <input type="text" id="dropoff-location" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Request Ride</button>
+                </form>
+            </div>
+
+            <div id="active-rides" class="subsection">
+                <h3>Your Active Requests</h3>
+                <div id="rider-rides-list"></div>
+            </div>
+        </div>
+
+        <!-- Driver Section -->
+        <div class="section" id="driver-section" style="display: none;">
+            <h2>Driver Dashboard</h2>
+            <div id="available-rides" class="subsection">
+                <h3>Available Ride Requests</h3>
+                <button id="refresh-rides-btn" class="btn btn-secondary">Refresh Requests</button>
+                <div id="available-rides-list"></div>
+            </div>
+
+            <div id="driver-rides" class="subsection">
+                <h3>Your Accepted Rides</h3>
+                <div id="driver-rides-list"></div>
+            </div>
+        </div>
+
+        <!-- Response Display -->
+        <div class="section">
+            <h2>API Response Log</h2>
+            <div id="response-log" class="response-log"></div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
