@@ -2,6 +2,5 @@ fastapi
 uvicorn
 pydantic
 passlib[bcrypt]
-sqlite3
 openai
 python-dotenv
