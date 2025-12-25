@@ -114,10 +114,29 @@ function updateServiceStatus(serviceName, status) {
 }
 
 // API Call Logging
+function sanitizeData(data) {
+    if (!data || typeof data !== 'object') return data;
+    
+    const sanitized = { ...data };
+    const sensitiveFields = ['password', 'hashed_password', 'token', 'secret', 'api_key'];
+    
+    for (const field of sensitiveFields) {
+        if (field in sanitized) {
+            sanitized[field] = '***';
+        }
+    }
+    
+    return sanitized;
+}
+
 function logAPICall(method, url, status, requestData = null, responseData = null) {
     const timestamp = new Date().toLocaleTimeString();
     const logEntry = document.createElement('div');
     logEntry.className = `log-entry ${status >= 200 && status < 300 ? 'success' : 'error'}`;
+    
+    // Sanitize sensitive data before logging
+    const sanitizedRequest = sanitizeData(requestData);
+    const sanitizedResponse = sanitizeData(responseData);
     
     logEntry.innerHTML = `
         <div>
@@ -126,8 +145,8 @@ function logAPICall(method, url, status, requestData = null, responseData = null
             <span class="log-url">${url}</span>
             <span class="log-status ${status >= 200 && status < 300 ? 'success' : 'error'}">(${status})</span>
         </div>
-        ${requestData ? `<div class="log-body">Request: ${JSON.stringify(requestData, null, 2)}</div>` : ''}
-        ${responseData ? `<div class="log-body">Response: ${JSON.stringify(responseData, null, 2)}</div>` : ''}
+        ${sanitizedRequest ? `<div class="log-body">Request: ${JSON.stringify(sanitizedRequest, null, 2)}</div>` : ''}
+        ${sanitizedResponse ? `<div class="log-body">Response: ${JSON.stringify(sanitizedResponse, null, 2)}</div>` : ''}
     `;
     
     const logContainer = document.getElementById('response-log');
@@ -175,7 +194,7 @@ async function handleLogin(e) {
         });
         
         const data = await response.json();
-        logAPICall('POST', url, response.status, { email: email }, data);
+        logAPICall('POST', url, response.status, { email, password }, data);
 
         if (data.error) {
             addFlowItem('User Service', 'Login', 'error', data.error);
