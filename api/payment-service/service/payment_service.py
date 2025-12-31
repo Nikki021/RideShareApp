@@ -28,17 +28,6 @@ class PaymentService:
         except requests.exceptions.RequestException:
             raise HTTPException(status_code=500, detail="Unable to connect to user service")
     
-    def _validate_ride(self, ride_id: str):
-        try:
-            response = requests.get(f"{RIDE_SERVICE_URL}/rides/{ride_id}")
-            if response.status_code == 404:
-                raise HTTPException(status_code=404, detail="Ride not found")
-            elif response.status_code != 200:
-                raise HTTPException(status_code=500, detail="Ride service is unavailable")
-            return response.json()
-        except requests.exceptions.RequestException:
-            raise HTTPException(status_code=500, detail="Unable to connect to ride service")
-    
     def process_payment(self, payment_create: PaymentCreate) -> Payment:
         self._validate_user(payment_create.rider_id, "rider")
         self._validate_user(payment_create.driver_id, "driver")
@@ -74,6 +63,8 @@ class PaymentService:
         return payment
     
     def _process_transaction(self, payment: Payment):
+        # Note: In a production system, implement balance checks and wallet management
+        # to prevent negative balances. Currently using simplified transaction tracking.
         if payment.rider_id not in self.rider_balances:
             self.rider_balances[payment.rider_id] = 0
         
