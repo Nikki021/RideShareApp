@@ -4,6 +4,9 @@ __pycache__/
 *$py.class
 *.so
 .Python
+env/
+venv/
+ENV/
 build/
 develop-eggs/
 dist/
@@ -30,10 +33,27 @@ env/
 .idea/
 *.swp
 *.swo
+*~
+.DS_Store
 
 # Environment variables
 .env
 .env.local
 
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Process IDs
+.pids
+
+# Temporary files
+tmp/
+temp/
+*.tmp
 # OS
 .DS_Store

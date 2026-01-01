@@ -58,7 +58,11 @@ def delete_user(user_id: str):
     return {"message": "User deleted successfully"}
 
 @router.post("/login")
-def login_user(email: str, password: str):
+def login_user(credentials: dict):
+    email = credentials.get("email")
+    password = credentials.get("password")
+    if not email or not password:
+        return {"error": "Email and password are required"}
     user = user_service.login_user(email, password).get("user_details")
     if not user:
         return {"error": "Invalid email or password"}
