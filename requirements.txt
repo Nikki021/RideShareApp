@@ -4,3 +4,4 @@ pydantic
 passlib[bcrypt]
 openai
 python-dotenv
+requests
